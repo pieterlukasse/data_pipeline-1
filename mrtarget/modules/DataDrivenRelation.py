@@ -241,59 +241,6 @@ class LocalTfidfTransformer(TfidfTransformer):
 
         return self
 
-class RedisRelationHandler(object):
-    '''
-    A Redis backend to optimise storage and lookup ot target-disease relations
-
-    '''
-
-    SCORE = "score:%(key)s"#sorted set with target/disease as key, disease/target as value and association score as sorting score
-    SUM = "sum:%(key)s"#store a float for each target or disease
-    WEIGHT = "weight:%(key)s"#store a float for each target or disease
-    RELATIONS= "weight:%(key)s"#sorted set with target/disease as key, target/disease as value and target/disease sum as sorting score
-
-    def __init__(self,
-                 target_data,
-                 disease_data,
-                 r_server=None,
-                 use_quantitiative_scores = False
-                 ):
-        '''
-        :param queue_id: queue id to attach to preconfigured queues
-        :param r_server: a redis.Redis instance to be used in methods. If supplied the RedisQueue object
-                             will not be pickable
-        :param max_size: maximum size of the queue. queue will block if full, and allow put only if smaller than the
-                         maximum size.
-        :return:
-        '''
-
-        self.r_server = r_server
-        if self.r_server is None:
-            self.r_server = new_redis_client()
-
-        self.target_data = target_data
-        self.disease_data = disease_data
-        self.available_targets = target_data.keys()
-        self.available_diseases = disease_data.keys()
-        vectorizer = DictVectorizer(sparse=True)
-        target_tdidf_transformer = LocalTfidfTransformer(smooth_idf=False, norm=None)
-        # target_tdidf_transformer = TfidfTransformer(smooth_idf=False, norm=None)
-        target_data_vector = vectorizer.fit_transform([target_data[i] for i in self.available_targets])
-        if not use_quantitiative_scores:
-            target_data_vector = target_data_vector > 0
-            target_data_vector = target_data_vector.astype(int)
-        transformed_targets = target_tdidf_transformer.fit_transform(target_data_vector)
-        for i in range(len(self.available_targets)):
-            target=self.available_targets[i]
-            vector= transformed_targets[i].toarray()[0]
-            pipe = self.r_server.pipeline()
-            for v in range(len(vector)):
-                if vector[v]:
-                    pipe.zadd(self.SCORE%dict(key=target), vectorizer.get_feature_names()[v], vector[v])
-            pipe.execute()
-            weighted_sum = vector.sum()
-            # self.r_server.add(self.SUM%dict(key=target), weighted_sum)
-            print i, target, weighted_sum
 
 class RelationHandler(object):
     '''
