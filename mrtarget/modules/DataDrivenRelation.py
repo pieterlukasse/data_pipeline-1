@@ -660,21 +660,3 @@ class DataDrivenRelationProcess(object):
         logger.info("flush loader")
         self.loader.flush()
         self.loader.close()
-
-
-    def get_hot_node_blacklist(self, data):
-        c = Counter()
-        for k,v in data.items():
-            c[k]=len(v)
-
-        logger.info('Most common diseases: %s'%c.most_common(10))
-        return [i[0] for i in c.most_common(10)]
-
-    def get_inverted_counts(self, data):
-        c = Counter()
-        for k, v in data.items():
-            c[k] = len(v)
-
-        # logger.info('Most common diseases: %s' % c.most_common(10))
-        return c
-
