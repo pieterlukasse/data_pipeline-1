@@ -1,6 +1,6 @@
 import logging
-from collections import Counter
-import sys, os
+import sys
+import os
 import numpy as np
 
 import pickle
