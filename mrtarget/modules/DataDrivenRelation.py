@@ -383,9 +383,10 @@ class RelationHandlerEuristicOverlapEstimation(RelationHandler):
 
         vectorizer = DictVectorizer(sparse=True)
         tdidf_transformer = LocalTfidfTransformer(smooth_idf=False, )
-        # tdidf_transformer = TfidfTransformer(smooth_idf=False,)
+
         data_vector = vectorizer.fit_transform([subject_data[i] for i in subject_ids])
         if not self.use_quantitiative_scores:
+            # convert into binary mode the sparse vector
             data_vector = data_vector > 0
             data_vector = data_vector.astype(int)
         transformed_data = tdidf_transformer.fit_transform(data_vector)
@@ -434,6 +435,7 @@ class RelationHandlerEuristicOverlapEstimation(RelationHandler):
             digested.add(i%buckets_number)
         return tuple(digested)
 
+
 class RelationHandlerEuristicOverlapEstimationPairProducer(RedisQueueWorkerProcess):
 
 
@@ -469,24 +471,6 @@ class RelationHandlerEuristicOverlapEstimationPairProducer(RedisQueueWorkerProce
                                                                     threshold=self.threshold):
                             self.put_into_queue_out((i, self.data_vector[i], j, self.data_vector[j], self.idf, self.idf_))
                 compared.add(j)
-
-class RelationHandlerProduceAll(RelationHandler):
-
-    def _produce_pairs(self, subject_data, subject_ids, shared_ids, threshold=0.5, sample_size=512):
-        vectorizer = DictVectorizer(sparse=True)
-        tdidf_transformer = TfidfTransformer(smooth_idf=False, norm=None)
-        data_vector = vectorizer.fit_transform([subject_data[i] for i in subject_ids])
-        limit = -1
-        for i in range(len(subject_ids[:limit])):
-            for j in range(len(subject_ids[:limit])):
-                if i>j:
-                    yield (i, data_vector[i],  j, data_vector[j])
-    @staticmethod
-    def digest_in_buckets(v, buckets_number):
-        digested =set()
-        for i in np.flatnonzero(v).flat:
-            digested.add(i%buckets_number)
-        return tuple(digested)
 
 
 class DataDrivenRelationProcess(object):
@@ -606,7 +590,6 @@ class DataDrivenRelationProcess(object):
             w.start()
 
         logger.debug('call relationhandlereuristicoverlapestimation')
-        # rel_handler = RelationHandlerProduceAll(target_data=target_data,
         rel_handler = RelationHandlerEuristicOverlapEstimation(target_data=target_data,
                                                                disease_data=disease_data,
                                                                ordered_target_keys=target_keys,
