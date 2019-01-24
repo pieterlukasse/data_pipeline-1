@@ -55,8 +55,6 @@ services:
     
   mrtarget:
     image: mrtarget:latest
-    build:
-      context: ./
     depends_on:
       - elasticsearch
       - redis
