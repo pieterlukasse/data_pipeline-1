@@ -1,3 +1,4 @@
+from __future__ import print_function
 import logging
 from mrtarget.common.ElasticsearchQuery import ESQuery
 from mrtarget.common.Redis import RedisLookupTablePickle
@@ -100,11 +101,11 @@ class GeneLookUpTable(object):
             return self._table.get(target_id, r_server=self._get_r_server(r_server))
         except KeyError:
             try:
-                target = self._es_query.get_objects_by_id(target_id,
+                target = next(self._es_query.get_objects_by_id(target_id,
                                                           Const.ELASTICSEARCH_GENE_NAME_INDEX_NAME,
                                                           Const.ELASTICSEARCH_GENE_NAME_DOC_NAME,
                                                           source_exclude='ortholog.*'
-                                                          ).next()
+                                                          ))
             except Exception as e:
                 self._logger.exception('Cannot retrieve target from elasticsearch')
                 raise KeyError()
@@ -134,7 +135,7 @@ class GeneLookUpTable(object):
         self._table.set(key, value, self._get_r_server(r_server))
 
     def __missing__(self, key):
-        print key
+        print(key)
 
     def keys(self, r_server=None):
         return self._table.keys(self._get_r_server(r_server))

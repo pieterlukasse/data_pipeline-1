@@ -1,3 +1,4 @@
+from __future__ import print_function
 import logging
 from collections import Counter
 import sys, os
@@ -289,7 +290,7 @@ class RedisRelationHandler(object):
             pipe.execute()
             weighted_sum = vector.sum()
             # self.r_server.add(self.SUM%dict(key=target), weighted_sum)
-            print i, target, weighted_sum
+            print(i, target, weighted_sum)
 
 class RelationHandler(object):
     '''

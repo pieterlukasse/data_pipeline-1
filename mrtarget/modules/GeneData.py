@@ -1,3 +1,4 @@
+from __future__ import print_function
 import logging
 from collections import OrderedDict
 from mrtarget.common.DataStructure import JSONSerializable
@@ -278,7 +279,7 @@ class Gene(JSONSerializable):
         try:
             self._private['suggestions']['input'] = [x.lower() for x in self._private['suggestions']['input']]
         except:
-            print "error", repr(self._private['suggestions']['input'])
+            print("error", repr(self._private['suggestions']['input']))
 
     def _create_facets(self):
         self._private['facets'] = dict()

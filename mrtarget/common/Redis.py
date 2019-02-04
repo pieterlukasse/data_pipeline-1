@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import base64
 import simplejson as json
 from collections import Counter
@@ -437,7 +438,7 @@ class RedisQueueWorkerProcess(Process):
         cur_file_token = current_process().name
 
         if _redis_queue_worker_base['profiling']:
-            print str(_redis_queue_worker_base)
+            print(str(_redis_queue_worker_base))
             cProfile.runctx('self._inner_run()',
                             globals(), locals(),
                             '/tmp/prof_%s.prof' % cur_file_token)
