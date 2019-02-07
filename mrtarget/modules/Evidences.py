@@ -1,3 +1,4 @@
+from builtins import str
 import hashlib
 import logging
 import os
@@ -308,7 +309,7 @@ def process_evidences_pipeline(filenames, first_n, es_client, redis_client,
         raise RuntimeError("Must specify at least one filename of evidence")
 
     # files that are not fetchable
-    failed_filenames = list(itertools.ifilterfalse(IO.check_to_open, filenames))
+    failed_filenames = list(itertools.filterfalse(IO.check_to_open, filenames))
 
     for uri in failed_filenames:
         logger.warning('failed to fetch uri %s', uri)

@@ -1,3 +1,4 @@
+from builtins import object
 import simplejson as json
 import logging
 import more_itertools
@@ -36,7 +37,7 @@ class EnsemblProcess(object):
             if not dry_run:
                 self.loader.put(Const.ELASTICSEARCH_ENSEMBL_INDEX_NAME,
                     Const.ELASTICSEARCH_ENSEMBL_DOC_NAME,
-                    entry['id'], line)
+                    entry['id'], entry)
             inserted_lines += 1
 
         self.logger.info("Read %d lines from %s", inserted_lines, ensembl_filename)

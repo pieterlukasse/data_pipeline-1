@@ -1,3 +1,4 @@
+from builtins import str
 from yapsy.IPlugin import IPlugin
 from mrtarget.Settings import Config
 from mrtarget.common import URLZSource

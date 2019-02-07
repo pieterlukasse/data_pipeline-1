@@ -1,3 +1,4 @@
+from builtins import object
 from collections import OrderedDict
 
 import csv
@@ -37,7 +38,7 @@ class ECO(JSONSerializable):
         # return self.code
         return ECOLookUpTable.get_ontology_code_from_url(self.code)
 
-class EcoProcess():
+class EcoProcess(object):
 
     def __init__(self, loader, eco_uri, so_uri):
         self.loader = loader
@@ -54,7 +55,7 @@ class EcoProcess():
         opentargets_ontologyutils.eco_so.load_evidence_classes(self.evidence_ontology, 
             self.so_uri, self.eco_uri)
 
-        for uri,label in self.evidence_ontology.current_classes.items():
+        for uri,label in list(self.evidence_ontology.current_classes.items()):
             eco = ECO(uri,
                       label,
                       self.evidence_ontology.classes_paths[uri]['all'],
@@ -73,7 +74,7 @@ class EcoProcess():
             self.loader.prepare_for_bulk_indexing(
                 self.loader.get_versioned_index(Const.ELASTICSEARCH_ECO_INDEX_NAME))
 
-        for eco_id, eco_obj in self.ecos.items():
+        for eco_id, eco_obj in list(self.ecos.items()):
             if not dry_run:
                 self.loader.put(index_name=Const.ELASTICSEARCH_ECO_INDEX_NAME,
                     doc_type=Const.ELASTICSEARCH_ECO_DOC_NAME,

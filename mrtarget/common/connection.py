@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 import logging
 import time
 import os
@@ -48,7 +50,7 @@ Don't try and use this anywhere but the main thread. It should work,
 but just don't try it!
 
 """
-class RedisManager():
+class RedisManager(object):
     def __init__(self, remote, host, port):
         self.logger = logging.getLogger(__name__)
         self.r_instance = None

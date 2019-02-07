@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 import logging
 import csv
 
@@ -14,7 +16,7 @@ class ReactomeNode(TreeNode, JSONSerializable):
         super(ReactomeNode, self).__init__(**kwargs)
 
 
-class ReactomeDataDownloader():
+class ReactomeDataDownloader(object):
 
     def __init__(self, pathway_data_url, pathway_relation_url):
         self.logger = logging.getLogger(__name__)
@@ -74,7 +76,7 @@ class ReactomeDataDownloader():
         self.logger.info('parsed %i rows from reactome_pathway_relation' % len(added_relations))
 
 
-class ReactomeProcess():
+class ReactomeProcess(object):
     def __init__(self, loader, pathway_data_url, pathway_relation_url):
         self.loader = loader
         self.g = nx.DiGraph(name="reactome")
@@ -168,7 +170,7 @@ class ReactomeProcess():
 
 
 
-class ReactomeRetriever():
+class ReactomeRetriever(object):
     """
     Will retrieve a Reactome object form the processed json stored in elasticsearch
     """

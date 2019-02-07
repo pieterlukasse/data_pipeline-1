@@ -1,9 +1,13 @@
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 import uuid
 from collections import defaultdict
 import os
 import re
 import json
-import ConfigParser
+import configparser
 import pkg_resources as res
 from envparse import env, ConfigurationError
 import mrtarget
@@ -18,7 +22,7 @@ def ini_from_file_or_resource(*filenames):
     return the configuration object or None
     '''
     f = [file_or_resource(fname) for fname in filenames if fname]
-    cfg = ConfigParser.ConfigParser()
+    cfg = configparser.ConfigParser()
     if cfg.read(f):
         # read() returns list of successfully parsed filenames
         return cfg
@@ -86,10 +90,10 @@ def read_option(option, cast=None, ini=ini, section='dev',
             else:
                 return ini.get(section, option)
 
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+        except (configparser.NoOptionError, configparser.NoSectionError):
             return default_value
 
-class Config():
+class Config(object):
 
     RELEASE_VERSION = read_option('CTTV_DATA_VERSION', default='')    
 

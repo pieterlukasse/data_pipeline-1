@@ -1,3 +1,7 @@
+from __future__ import division
+from builtins import str
+from past.utils import old_div
+from builtins import object
 import copy
 import json
 import logging
@@ -60,7 +64,7 @@ class DataNormaliser(object):
         return normalized
 
 
-class ExtendedInfo():
+class ExtendedInfo(object):
     data = dict()
 
     def extract_info(self, obj):
@@ -129,7 +133,7 @@ class ExtendedInfoECO(ExtendedInfo):
                          label=eco.label),
 
 
-class EvidenceManager():
+class EvidenceManager(object):
     def __init__(self, lookup_data, eco_scores_uri, excluded_biotypes, datasources_to_datatypes):
         self.logger = logging.getLogger(__name__)
         self.available_genes = lookup_data.available_genes
@@ -537,7 +541,7 @@ class EvidenceManager():
 
     @staticmethod
     def _map_to_reference_ensembl_gene(ensg, non_reference_genes, logger=logging.getLogger(__name__)):
-        for symbol, data in non_reference_genes.items():
+        for symbol, data in list(non_reference_genes.items()):
             if ensg in data['alternative']:
                 logger.warning(
                     "Mapped non reference ensembl gene id %s to %s for gene %s" % (ensg, data['reference'], symbol))
@@ -561,7 +565,7 @@ class EvidenceManager():
 class Evidence(JSONSerializable):
     def __init__(self, evidence, datasources_to_datatypes):
         self.logger = logging.getLogger(__name__)
-        if isinstance(evidence, str) or isinstance(evidence, unicode):
+        if isinstance(evidence, str) or isinstance(evidence, str):
             self.load_json(evidence)
         elif isinstance(evidence, dict):
             self.evidence = evidence
@@ -597,8 +601,8 @@ class Evidence(JSONSerializable):
             elif self.evidence['type'] == 'rna_expression':
                 pvalue = self._get_score_from_pvalue_linear(self.evidence['evidence']['resource_score']['value'])
                 log2_fold_change = self.evidence['evidence']['log2_fold_change']['value']
-                fold_scale_factor = abs(log2_fold_change) / 10.
-                rank = self.evidence['evidence']['log2_fold_change']['percentile_rank'] / 100.
+                fold_scale_factor = old_div(abs(log2_fold_change), 10.)
+                rank = old_div(self.evidence['evidence']['log2_fold_change']['percentile_rank'], 100.)
                 score = pvalue * fold_scale_factor * rank
                 if score > 1:
                     score = 1.
@@ -661,13 +665,13 @@ class Evidence(JSONSerializable):
                                 max_sample_size = int(mutation['number_mutated_samples'])
                     if sample_total_coverage > max_sample_size:
                         sample_total_coverage = max_sample_size
-                    frequency = DataNormaliser.renormalize(sample_total_coverage / max_sample_size, [0., 9.], [.5, 1.])
+                    frequency = DataNormaliser.renormalize(old_div(sample_total_coverage, max_sample_size), [0., 9.], [.5, 1.])
                 self.evidence['scores']['association_score'] = float(
                     self.evidence['evidence']['resource_score']['value']) * frequency
             elif self.evidence['type'] == 'literature':
                 score = float(self.evidence['evidence']['resource_score']['value'])
                 if self.evidence['sourceID'] == 'europepmc':
-                    score = score / 100.
+                    score = old_div(score, 100.)
                     if score > 1:
                         score = 1.
                 self.evidence['scores']['association_score'] = score

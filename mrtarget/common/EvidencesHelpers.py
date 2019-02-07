@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 import json
 import os
 import logging
@@ -181,7 +183,7 @@ def close_writers_on_done(_status, process_context):
 
 def serialise_object_to_json(obj):
     serialised_obj = obj
-    if not(isinstance(obj, str) or isinstance(obj, unicode)):
+    if not(isinstance(obj, str) or isinstance(obj, str)):
         if isinstance(obj, JSONSerializable):
             serialised_obj = obj.to_json()
         else:

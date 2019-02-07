@@ -1,3 +1,4 @@
+from builtins import object
 import logging
 from collections import OrderedDict
 from mrtarget.common.DataStructure import JSONSerializable
@@ -81,7 +82,7 @@ class EFO(JSONSerializable):
         self._private['suggestions']['input'].append(self.get_id())
 
 
-class EfoProcess():
+class EfoProcess(object):
 
     def __init__(self,
                  loader,
@@ -116,7 +117,7 @@ class EfoProcess():
         utils = DiseaseUtils()
         disease_phenotypes = utils.get_disease_phenotypes(self.disease_ontology, self.hpo_uri, self.mp_uri, disease_phenotype_uris_counter)
 
-        for uri,label in self.disease_ontology.current_classes.items():
+        for uri,label in list(self.disease_ontology.current_classes.items()):
             properties = self.disease_ontology.parse_properties(URIRef(uri))
 
             #create a text block definition/description by joining others together
@@ -167,7 +168,7 @@ class EfoProcess():
             self.loader.prepare_for_bulk_indexing(
                 self.loader.get_versioned_index(Const.ELASTICSEARCH_EFO_LABEL_INDEX_NAME))
 
-        for efo_id, efo_obj in self.efos.items():
+        for efo_id, efo_obj in list(self.efos.items()):
             if not dry_run:
                 self.loader.put(index_name=Const.ELASTICSEARCH_EFO_LABEL_INDEX_NAME,
                                 doc_type=Const.ELASTICSEARCH_EFO_LABEL_DOC_NAME,

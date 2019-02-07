@@ -1,9 +1,11 @@
+from builtins import str
+from builtins import object
 import logging
 from mrtarget.common.ElasticsearchQuery import ESQuery
 from mrtarget.Settings import Config
 import mrtarget.cfg
 
-class Metrics:
+class Metrics(object):
     def __init__(self, es, filename, datasources_to_datatypes):
         self.logger = logging.getLogger(__name__)
         self.esquery = ESQuery(es)
@@ -40,7 +42,7 @@ class Metrics:
                 "evidence link to trinucleotide expansion:\t" + str(count_trinucleotide_evidence['hits']['total']) + "\n"
             )
 
-            for ds in self.datasources_to_datatypes.iterkeys():
+            for ds in self.datasources_to_datatypes.keys():
                 count_datasource_evidence = self.esquery.count_datasource_evidence(ds)
                 metrics_output.write("evidence from datasource " + ds + ":\t" + str(count_datasource_evidence['hits']['total']) + "\n")
 

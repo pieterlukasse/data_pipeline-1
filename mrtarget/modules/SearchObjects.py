@@ -1,3 +1,5 @@
+from builtins import range
+from builtins import object
 import json
 import logging
 
@@ -80,7 +82,7 @@ class SearchObject(JSONSerializable, object):
         pass
 
     def _parse_json(self, json_input):
-        if isinstance(json_input, str) or isinstance(json_input, unicode):
+        if isinstance(json_input, str) or isinstance(json_input, str):
             json_input=json.loads(json_input)
         return json_input
 
@@ -115,7 +117,7 @@ class SearchObjectTarget(SearchObject, object):
         self.hgnc_id=json_input['hgnc_id']
         self.ensembl_gene_id=json_input['ensembl_gene_id']
         if json_input['ortholog']:
-            for species,ortholist in json_input['ortholog'].items():
+            for species,ortholist in list(json_input['ortholog'].items()):
                 self.ortholog[species]=[
                         {'symbol': o["ortholog_species_symbol"],
                          'id':     o["ortholog_species_assert_ids"],
@@ -205,7 +207,7 @@ class SearchObjectProcess(object):
             chembl_molecule_set_uri_pattern)
         self.chembl_handler.get_molecules_from_evidence(self.esquery)
         all_molecules = set()
-        for target, molecules in  self.chembl_handler.target2molecule.items():
+        for target, molecules in  list(self.chembl_handler.target2molecule.items()):
             all_molecules = all_molecules|molecules
         all_molecules = sorted(all_molecules)
         query_batch_size = 100
@@ -296,5 +298,4 @@ class SearchObjectProcess(object):
         if not dry_run:
             self.loader.put(Const.ELASTICSEARCH_DATA_SEARCH_INDEX_NAME,
                 Const.ELASTICSEARCH_DATA_SEARCH_DOC_NAME+'-'+so.type,
-                so.id, so.to_json(),
-                create_index=False)
+                so.id, so.to_json())

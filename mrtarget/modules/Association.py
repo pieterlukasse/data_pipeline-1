@@ -1,3 +1,5 @@
+from builtins import range
+from builtins import object
 import logging
 import copy
 
@@ -39,7 +41,7 @@ class Association(JSONSerializable):
         self.is_direct = is_direct
         self.set_id()
 
-        for method_key, method in ScoringMethods.__dict__.items():
+        for method_key, method in list(ScoringMethods.__dict__.items()):
             if not method_key.startswith('_'):
                 self.set_scoring_method(method, AssociationScore(datasources, datatypes))
 
@@ -65,12 +67,12 @@ class Association(JSONSerializable):
                                       expression_tissues=[])
 
     def get_scoring_method(self, method):
-        if method not in ScoringMethods.__dict__.values():
+        if method not in list(ScoringMethods.__dict__.values()):
             raise AttributeError("method need to be a valid ScoringMethods")
         return self.__dict__[method]
 
     def set_scoring_method(self, method, score):
-        if method not in ScoringMethods.__dict__.values():
+        if method not in list(ScoringMethods.__dict__.values()):
             raise AttributeError("method need to be a valid ScoringMethods")
         if not isinstance(score, AssociationScore):
             raise AttributeError("score need to be an instance"
@@ -83,7 +85,7 @@ class Association(JSONSerializable):
     def _inject_tractability_in_target(self, gene_obj):
         def _create_facet(categories_dict):
             if isinstance(categories_dict, dict):
-                return functional.seq(categories_dict.viewitems())\
+                return functional.seq(categories_dict.items())\
                     .filter(lambda e: e[1] > 0)\
                     .map(lambda e: e[0]).to_list()
             else:
@@ -91,8 +93,8 @@ class Association(JSONSerializable):
 
         def _merge_facets(the_dict):
             if isinstance(the_dict, dict):
-                return functional.seq(the_dict.viewitems())\
-                    .flat_map(lambda e: itertools.imap(lambda el: e[0] + '_' + el,e[1]))\
+                return functional.seq(the_dict.items())\
+                    .flat_map(lambda e: map(lambda el: e[0] + '_' + el,e[1]))\
                     .to_list()
             else:
                 return []
@@ -212,11 +214,11 @@ class Association(JSONSerializable):
 
     def __bool__(self):
         return self.get_scoring_method(ScoringMethods.HARMONIC_SUM).overall != 0
-    def __nonzero__(self):
+    def __bool__(self):
         return self.__bool__()
 
 
-class EvidenceScore():
+class EvidenceScore(object):
     def __init__(self,
                  evidence_string = None,
                  score= None,
@@ -237,7 +239,7 @@ class EvidenceScore():
         self.is_direct = is_direct
 
 
-class Scorer():
+class Scorer(object):
     '''
     Aggregates evidence for a given target-disease pair
     '''
@@ -247,7 +249,7 @@ class Scorer():
     def score(self,target, disease, evidence_scores, is_direct, datasources_to_datatypes):
 
 
-        datasources = datasources_to_datatypes.keys()
+        datasources = list(datasources_to_datatypes.keys())
         datatypes = set(datasources_to_datatypes.values())
 
         association = Association(target, disease, is_direct, datasources, datatypes)
@@ -356,7 +358,7 @@ class TargetDiseaseEvidenceProducer(RedisQueueWorkerProcess):
         self.data_cache.clear()
 
     def produce_pairs(self):
-        for key,evidence in self.data_cache.items():
+        for key,evidence in list(self.data_cache.items()):
             is_direct = False
             for e in evidence:
                 if e.is_direct:
@@ -485,7 +487,7 @@ class ScoreProducer(RedisQueueWorkerProcess):
                 self.logger.warning('Skipped association with score 0: %s-%s' % (target, disease))
 
 
-class ScoringProcess():
+class ScoringProcess(object):
 
     def __init__(self,
                  loader,

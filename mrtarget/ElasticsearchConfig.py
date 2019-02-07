@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 from mrtarget.Settings import Config
 from mrtarget.constants import Const
 from addict import Dict
@@ -150,7 +152,7 @@ def _generate_1chunk_analyzer():
     return ochunk.to_dict()
 
 
-class ElasticSearchConfiguration():
+class ElasticSearchConfiguration(object):
 
     generic_shard_number = '9'
     generic_replicas_number = '0'

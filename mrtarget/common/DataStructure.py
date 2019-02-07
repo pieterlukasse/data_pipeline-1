@@ -1,5 +1,7 @@
+from builtins import str
+from builtins import object
 import simplejson as json
-from UserDict import UserDict
+from collections import UserDict
 
 from datetime import datetime, date
 
@@ -41,7 +43,7 @@ class JSONSerializable(object):
                           cls=PipelineEncoder)
 
     def load_json(self, data):
-        if isinstance(data, str) or isinstance(data, unicode):
+        if isinstance(data, str) or isinstance(data, str):
             self.__dict__.update(**json.loads(data))
         elif isinstance(data, dict):#already parsed json obj
             self.__dict__.update(**data)

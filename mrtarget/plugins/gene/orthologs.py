@@ -31,7 +31,8 @@ class Orthologs(IPlugin):
 
         self._logger.info("Ortholog parsing - requesting from URL %s",data_config.hgnc_orthologs)
 
-        with URLZSource(data_config.hgnc_orthologs).open() as source:
+        #must open the file in text mode for csv.DictReader to handle it correctly
+        with URLZSource(data_config.hgnc_orthologs).open("rt") as source:
             reader = csv.DictReader(source, delimiter="\t")
             for row in reader:
                 if row['human_ensembl_gene'] in genes:
@@ -44,7 +45,7 @@ class Orthologs(IPlugin):
             if data['ortholog_species'] in self.orthologs_species:
                 # get rid of some redundant (ie.human) field that we are going to
                 # get from other sources anyways
-                ortholog_data = dict((k, v) for (k, v) in data.iteritems() if k.startswith('ortholog'))
+                ortholog_data = dict((k, v) for (k, v) in data.items() if k.startswith('ortholog'))
 
                 # split the fields with multiple values into lists
                 if 'ortholog_species_assert_ids' in data:

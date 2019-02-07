@@ -2,6 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
+from past.utils import old_div
 import base64
 import simplejson as json
 from collections import Counter
@@ -22,7 +29,7 @@ np.seterr(divide='warn', invalid='warn')
 from mrtarget.Settings import Config
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 import time
@@ -50,8 +57,8 @@ def millify(n):
         n = float(n)
         millnames=['','K','M','G','P']
         millidx=max(0, min(len(millnames) - 1,
-                           int(np.math.floor(np.math.log10(abs(n)) / 3))))
-        return '%.1f%s'%(n/10**(3*millidx),millnames[millidx])
+                           int(np.math.floor(old_div(np.math.log10(abs(n)), 3)))))
+        return '%.1f%s'%(old_div(n,10**(3*millidx)),millnames[millidx])
     except Exception:
         return str(n)
 

@@ -1,4 +1,5 @@
 '''imported from cttv.model'''
+from builtins import object
 import hashlib
 import json
 from collections import OrderedDict
@@ -10,13 +11,13 @@ logger = logging.getLogger(__name__)
 
 
 def assertJSONEqual(a, b, msg='Values are not equal', keys = []):
-    if not(isinstance(a, str) or isinstance(a, unicode)):
+    if not(isinstance(a, str) or isinstance(a, str)):
         if keys and isinstance(a, dict):
-            a=dict((k,v) for k,v in a.items() if k in keys)
+            a=dict((k,v) for k,v in list(a.items()) if k in keys)
         a=json.dumps(a, indent=4, sort_keys=True)
-    if not(isinstance(b, str) or isinstance(b, unicode)):
+    if not(isinstance(b, str) or isinstance(b, str)):
         if keys and isinstance(a, dict):
-            b=dict((k,v) for k,v in b.items() if k in keys)
+            b=dict((k,v) for k,v in list(b.items()) if k in keys)
         b=json.dumps(b, indent=4, sort_keys=True)
     d = Differ()
     result = list(
@@ -28,7 +29,7 @@ def assertJSONEqual(a, b, msg='Values are not equal', keys = []):
 
     return True
 
-class DatatStructureFlattener:
+class DatatStructureFlattener(object):
     '''Class to flatten nested Python data structures into ordered dictionaries
     and to compute hexadigests of them when serialised as JSON. Used to compute
     hexadigests for JSON represented as Python data structures so that
@@ -54,7 +55,7 @@ class DatatStructureFlattener:
             for i, item in enumerate(structure):
                 self.flatten(item, "%d" % i, path + "->" + key, flattened)
         else:
-            for new_key, value in structure.items():
+            for new_key, value in list(structure.items()):
                 self.flatten(value, new_key, path + "->" + key, flattened)
         return flattened
     def get_ordered_dict(self):

@@ -6,7 +6,8 @@ then it should not go here either.
 '''
 
 
-class Const:
+from builtins import object
+class Const(object):
     ELASTICSEARCH_VALIDATED_DATA_INDEX_NAME = 'invalid-evidence-data'
     ELASTICSEARCH_VALIDATED_DATA_DOC_NAME = 'evidencestring'
     ELASTICSEARCH_DATA_INDEX_NAME = 'evidence-data'

@@ -1,3 +1,4 @@
+from builtins import object
 import base64
 import collections
 import json
@@ -820,10 +821,10 @@ class ESQuery(object):
         :return: flattened dictionary
         '''
         flat_fields = []
-        for k, v in d.items():
+        for k, v in list(d.items()):
             flat_key = parent_key + separator + k if parent_key else k
             if isinstance(v, collections.MutableMapping):
-                flat_fields.extend(ESQuery.flatten(v, flat_key, separator=separator).items())
+                flat_fields.extend(list(ESQuery.flatten(v, flat_key, separator=separator).items()))
             else:
                 flat_fields.append((flat_key, v))
         return dict(flat_fields)

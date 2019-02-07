@@ -1,3 +1,4 @@
+from builtins import object
 import logging
 import jsonpickle
 import base64
@@ -38,7 +39,7 @@ class UniprotDownloader(object):
 
                 #horrible hack, just save it as a blob
                 #have already (re-)created the index so don't do it again
-                json_seqrec = base64.b64encode(jsonpickle.encode(entry))
+                json_seqrec = base64.b64encode(jsonpickle.encode(entry).encode('utf-8'))
                 #we canskip this bit (and only this bit!) if dry running
                 if not dry_run:
                     self.loader.put(Const.ELASTICSEARCH_UNIPROT_INDEX_NAME, 

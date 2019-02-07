@@ -1,3 +1,6 @@
+from builtins import str
+from builtins import range
+from builtins import object
 import functools
 import logging
 
@@ -19,7 +22,7 @@ def get_chembl_url(uri):
 
     def _fmt(**kwargs):
         '''generate uri string params from kwargs dict'''
-        l = ['='.join([k, str(v)]) for k, v in kwargs.iteritems()]
+        l = ['='.join([k, str(v)]) for k, v in kwargs.items()]
         return '?' + '&'.join(l)
 
     while next_get:
@@ -107,7 +110,7 @@ class ChEMBLLookup(object):
             self.download_mechanisms()
         required_molecules = set()
         self._logger.info('chembl t2m mols')
-        for molecules in self.target2molecule.values():
+        for molecules in list(self.target2molecule.values()):
             for molecule in molecules:
                 required_molecules.add(molecule)
         required_molecules = list(required_molecules)
@@ -137,13 +140,13 @@ class ChEMBLLookup(object):
         protein_classes = get_chembl_url(self.protein_uri)
         for i in protein_classes:
             protein_class_id = i.pop('protein_class_id')
-            protein_class_data = dict((k, dict(label=v, id='')) for k, v in i.items() if v)  # remove values with none
+            protein_class_data = dict((k, dict(label=v, id='')) for k, v in list(i.items()) if v)  # remove values with none
             self.protein_class[protein_class_id] = protein_class_data
             self._store_label_to_protein_class(protein_class_id, protein_class_data)
 
         '''inject missing ids'''
-        for k, v in self.protein_class.items():
-            for level, data in v.items():
+        for k, v in list(self.protein_class.items()):
+            for level, data in list(v.items()):
                 label = data['label']
                 if label in self.protein_class_label_to_id:
                     data['id'] = self.protein_class_label_to_id[label]
@@ -151,7 +154,7 @@ class ChEMBLLookup(object):
     def _store_label_to_protein_class(self, protein_class_id, protein_class_data):
         max_level = 0
         label = ''
-        for k, v in protein_class_data.items():
+        for k, v in list(protein_class_data.items()):
             level = int(k[1])
             if level >= max_level:
                 max_level = level
@@ -219,7 +222,7 @@ class ChEMBLLookup(object):
         if 'molecules' in data:
             map_f = functools.partial(_append_to_mol2syn, molecules_syn_dict)
             mols_without_syn = \
-                list(itertools.ifilterfalse(lambda mol: mol is None, itertools.imap(map_f, data['molecules'])))
+                list(itertools.filterfalse(lambda mol: mol is None, map(map_f, data['molecules'])))
             if mols_without_syn:
                 self._logger.debug('molecule list with no synonyms %s', str(mols_without_syn))
 

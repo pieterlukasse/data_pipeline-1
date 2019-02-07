@@ -1,5 +1,6 @@
 from __future__ import absolute_import, print_function
 
+from builtins import object
 import functools
 from contextlib import contextmanager
 import gzip
@@ -54,7 +55,7 @@ class URLZSource(object):
         open_f = None
 
         if filename.endswith('.gz'):
-            open_f = functools.partial(gzip.open, mode='rb')
+            open_f = functools.partial(gzip.open, mode=mode)
 
         elif filename.endswith('.zip'):
             zipped_data = zipfile.ZipFile(filename)
@@ -63,7 +64,7 @@ class URLZSource(object):
             filename = info
             open_f = functools.partial(zipped_data.open)
         else:
-            open_f = functools.partial(open, mode='r')
+            open_f = functools.partial(open, mode=mode)
 
         with open_f(filename) as fd:
             yield fd

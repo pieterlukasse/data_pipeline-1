@@ -1,3 +1,6 @@
+from builtins import str
+from builtins import range
+from builtins import object
 import random
 from collections import defaultdict
 import time
@@ -14,7 +17,7 @@ from mrtarget.ElasticsearchConfig import ElasticSearchConfiguration
 
 
 
-class Loader():
+class Loader(object):
     """
     Loads data to elasticsearch
     """
@@ -23,7 +26,7 @@ class Loader():
                  es,
                  chunk_size=1000,
                  dry_run = False,
-                 max_flush_interval = random.choice(range(60,120))):
+                 max_flush_interval = random.choice(list(range(60,120)))):
 
         self.logger = logging.getLogger(__name__)
 
@@ -101,6 +104,7 @@ class Loader():
                         raise e
                     else:
                         time_to_wait = 5*retry
+                        print(self.cache)
                         self.logger.warning("push to elasticsearch failed for chunk: %s.  retrying in %is..."%(str(e),time_to_wait))
                         time.sleep(time_to_wait)
 
@@ -199,10 +203,10 @@ class Loader():
 
                 try:
                     if 'mappings' in body:
-                        datatypes = body['mappings'].keys()
+                        datatypes = list(body['mappings'].keys())
                         for dt in datatypes:
                             if dt != '_default_':
-                                keys = body['mappings'][dt].keys()
+                                keys = list(body['mappings'][dt].keys())
                                 if 'dynamic_templates' in keys:
                                     del keys[keys.index('dynamic_templates')]
                                 assertJSONEqual(mappings[index_name]['mappings'][dt],
@@ -213,7 +217,7 @@ class Loader():
                         assertJSONEqual(settings[index_name]['settings']['index'],
                                         body['settings'],
                                         msg='settings in elasticsearch are different from the ones sent',
-                                        keys=body['settings'].keys(),#['number_of_replicas','number_of_shards','refresh_interval']
+                                        keys=list(body['settings'].keys()),#['number_of_replicas','number_of_shards','refresh_interval']
                                         )
                 except ValueError as e:
                     self.logger.exception("elasticsearch settings error")
@@ -235,7 +239,7 @@ class Loader():
 
 
             index_created = False
-            for index_root,mapping in ElasticSearchConfiguration.INDEX_MAPPPINGS.items():
+            for index_root,mapping in list(ElasticSearchConfiguration.INDEX_MAPPPINGS.items()):
                 if index_root in index_name:
                     self._safe_create_index(index_name, mapping)
                     index_created=True

@@ -1,4 +1,5 @@
 from __future__ import print_function
+from builtins import object
 import logging
 from collections import OrderedDict
 from mrtarget.common.DataStructure import JSONSerializable
@@ -169,7 +170,7 @@ class Gene(JSONSerializable):
         if seqrec.dbxrefs:
             self.dbxrefs.extend(seqrec.dbxrefs)
             self.dbxrefs= sorted(list(set(self.dbxrefs)))
-        for k, v in seqrec.annotations.items():
+        for k, v in list(seqrec.annotations.items()):
             if k == 'accessions':
                 self.uniprot_accessions = v
             if k == 'keywords':
@@ -303,7 +304,7 @@ class Gene(JSONSerializable):
 
 
 
-class GeneSet():
+class GeneSet(object):
     def __init__(self):
         self.genes = OrderedDict()
 
@@ -330,7 +331,9 @@ class GeneSet():
 
 
     def iterate(self):
-        for k, v in self.genes.iteritems():
+        #have to copy it into a tuple so it can be modified
+        #avoids changes deleting while iterating
+        for k, v in tuple(self.genes.items()):
             yield k, v
 
     def __len__(self):
@@ -347,7 +350,7 @@ class GeneSet():
 
         ens, hgnc, other, ens_active, uni, swiss = 0., 0., 0., 0., 0., 0.
 
-        for geneid, gene in self.genes.items():
+        for geneid, gene in list(self.genes.items()):
             if geneid.startswith('ENS'):
                 ens += 1
             elif geneid.startswith('HGNC:'):
@@ -372,7 +375,7 @@ class GeneSet():
                          ens_active, ens_active / tot * 100.)
         return stats
 
-class GeneManager():
+class GeneManager(object):
     """
     Merge data available in ?elasticsearch into proper json objects
 
@@ -431,8 +434,7 @@ class GeneManager():
             if not dry_run:
                 self.loader.put(Const.ELASTICSEARCH_GENE_NAME_INDEX_NAME,
                     Const.ELASTICSEARCH_GENE_NAME_DOC_NAME,
-                    geneid, gene.to_json(),
-                    create_index=False)
+                    geneid, gene.to_json())
 
         if not dry_run:
             self.loader.flush_all_and_wait(Const.ELASTICSEARCH_GENE_NAME_INDEX_NAME)

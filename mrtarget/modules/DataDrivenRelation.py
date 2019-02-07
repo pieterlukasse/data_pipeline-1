@@ -1,4 +1,9 @@
 from __future__ import print_function
+from __future__ import division
+from builtins import zip
+from builtins import range
+from builtins import object
+from past.utils import old_div
 import logging
 from collections import Counter
 import sys, os
@@ -132,13 +137,13 @@ class DistanceComputationWorker(RedisQueueWorkerProcess):
         correlation = pdist(vectors, 'correlation')[0]
         if math.isnan(correlation):
             correlation = 0.0
-        return dict(euclidean = 1.-(pdist(vectors, 'euclidean')[0]/(math.sqrt(len(keys))*2)),
+        return dict(euclidean = 1.-(old_div(pdist(vectors, 'euclidean')[0],(math.sqrt(len(keys))*2))),
                      # jaccard_formal= pdist(vectors, 'jaccard')[0],
                      # matching=pdist(vectors, 'matching')[0],
                      # matching_b=pdist(vectors_b, 'matching')[0],
                      # cosine=pdist([subj_vector_capped, obj_vector_capped], 'cosine')[0],
                      # correlation=correlation,
-                     cityblock=1-(pdist(vectors, 'cityblock')[0]/(len(keys)*2)),
+                     cityblock=1-(old_div(pdist(vectors, 'cityblock')[0],(len(keys)*2))),
                      # hamming=pdist(vectors, 'hamming')[0],
                      # hamming_b=pdist(vectors_b, 'hamming')[0],
                      )
@@ -232,7 +237,7 @@ class LocalTfidfTransformer(TfidfTransformer):
             # log+1 instead of log makes sure terms with zero idf don't get
             # suppressed entirely.
             # idf = np.log(df / n_samples)
-            idf = df / n_samples
+            idf = old_div(df, n_samples)
             self._idf_diag = sp.spdiags(idf,
                                         diags=0, m=n_features, n=n_features)
 
@@ -270,8 +275,8 @@ class RedisRelationHandler(object):
 
         self.target_data = target_data
         self.disease_data = disease_data
-        self.available_targets = target_data.keys()
-        self.available_diseases = disease_data.keys()
+        self.available_targets = list(target_data.keys())
+        self.available_diseases = list(disease_data.keys())
         vectorizer = DictVectorizer(sparse=True)
         target_tdidf_transformer = LocalTfidfTransformer(smooth_idf=False, norm=None)
         # target_tdidf_transformer = TfidfTransformer(smooth_idf=False, norm=None)
@@ -388,7 +393,7 @@ class OverlapDistance(object):
             xy_union=set()
         else:
             xy_union = x_nz | y_nz
-            distance = math.sqrt(float(len(xy_intersection)) / len(xy_union))
+            distance = math.sqrt(old_div(float(len(xy_intersection)), len(xy_union)))
         return distance, x_nz, y_nz, xy_intersection, xy_union
 
     @staticmethod
@@ -412,7 +417,7 @@ class OverlapDistance(object):
             xy_union = set()
         else:
             xy_union = x_nz | y_nz
-            distance = math.sqrt(sum((idf_[i] for i in xy_intersection)) / sum((idf_[i] for i in xy_union)))
+            distance = math.sqrt(old_div(sum((idf_[i] for i in xy_intersection)), sum((idf_[i] for i in xy_union))))
         return distance, x_nz, y_nz, xy_intersection, xy_union
 
     @staticmethod
@@ -420,8 +425,8 @@ class OverlapDistance(object):
         shared_wc=float(min(x_sum, y_sum))
         union_wc = max(x_sum, y_sum)
         # union_wc = (x_sum+y_sum)/2.
-        ratio_above_threshold = (1./threshold)**2
-        ratio_wc = union_wc/shared_wc
+        ratio_above_threshold = (old_div(1.,threshold))**2
+        ratio_wc = old_div(union_wc,shared_wc)
         return ratio_wc<ratio_above_threshold
 
 
@@ -464,7 +469,7 @@ class RelationHandlerEuristicOverlapEstimation(RelationHandler):
                                                                                threshold,
                                                                                sums_vector,
                                                                                data_vector,
-                                                                               idf= dict(zip(vectorizer.feature_names_, list(tdidf_transformer.idf_))),
+                                                                               idf= dict(list(zip(vectorizer.feature_names_, list(tdidf_transformer.idf_)))),
                                                                                idf_ = 1-tdidf_transformer.idf_,
                                                                                )
                           for i in range(Config.WORKERS_NUMBER)]
@@ -569,15 +574,15 @@ class DataDrivenRelationProcess(object):
             target_data, disease_data = self.es_query.get_disease_to_targets_vectors()
             pickle.dump((target_data, disease_data), open(tmp_data_dump, 'w'))
         logger.info('Retrieved all the associations data in %i s'%(time.time()-start_time))
-        logger.info('target data length: %s size in memory: %f Kb'%(len(target_data),sys.getsizeof(target_data)/1024.))
-        logger.info('disease data length: %s size in memory: %f Kb' % (len(disease_data),sys.getsizeof(disease_data)/1024.))
+        logger.info('target data length: %s size in memory: %f Kb'%(len(target_data),old_div(sys.getsizeof(target_data),1024.)))
+        logger.info('disease data length: %s size in memory: %f Kb' % (len(disease_data),old_div(sys.getsizeof(disease_data),1024.)))
 
         '''sort the lists and keep using always the same order in all the steps'''
         disease_keys = sorted(disease_data.keys())
         target_keys = sorted(target_data.keys())
 
         number_of_workers = Config.WORKERS_NUMBER
-        number_of_storers = number_of_workers / 2
+        number_of_storers = old_div(number_of_workers, 2)
         queue_per_worker =150
 
 
@@ -714,7 +719,7 @@ class DataDrivenRelationProcess(object):
 
     def get_hot_node_blacklist(self, data):
         c = Counter()
-        for k,v in data.items():
+        for k,v in list(data.items()):
             c[k]=len(v)
 
         logger.info('Most common diseases: %s'%c.most_common(10))
@@ -722,7 +727,7 @@ class DataDrivenRelationProcess(object):
 
     def get_inverted_counts(self, data):
         c = Counter()
-        for k, v in data.items():
+        for k, v in list(data.items()):
             c[k] = len(v)
 
         # logger.info('Most common diseases: %s' % c.most_common(10))
